@@ -1,0 +1,57 @@
+body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    /* Lista de pasos */
+    .paso-item {
+      padding: 16px;
+      margin-bottom: 10px;
+      background-color: #fff;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      color: #666;
+      transition: all 0.2s ease;
+    }
+
+    /* Estilo para destacar el paso activo */
+    .paso-item.activo {
+      border-color: #007aff;
+      background-color: #eef6ff;      
+      color: #000;
+      font-weight: bold;
+      transform: scale(1.02);
+    }
+
+    /* Botones de control */
+    .controles {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    button {
+      flex: 1;
+      padding: 15px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background-color: #007aff;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
