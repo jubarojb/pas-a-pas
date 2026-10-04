@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <title>Secuencia de Pasos</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registrado con éxito', reg))
+          .catch(err => console.warn('Error al registrar el Service Worker', err));
+      });
+    }
+  </script>
+  <!-- FINAL PWA -->  
+</head>
+<body>
+
+  <h1>Turno de Juego v1</h1>
+
+  <!-- Contenedor de pasos -->
+  <div id="lista-pasos">
+    <div class="paso-item activo"><strong>1. Fase de inteligencia</strong></div>
+    <div class="paso-item"><strong>2. Fase de Comandos</strong></div>
+    <div class="paso-item">2a. Inicio de Turno</div>
+    <div class="paso-item">2b. Generación</div>
+    <div class="paso-item">2c. Acciones</div>
+    <div class="paso-item">2d. Fin del Turno</div>
+    <div class="paso-item">2e. Robo</div>
+    <div class="paso-item">2f. Reabastecimiento</div>
+    <div class="paso-item"><strong>3. Fase del SOM</strong></div>
+    <div class="paso-item">3a. Ataques del SOM</div>
+    <div class="paso-item">3b. Resolución de Objetivo</div>
+    <div class="paso-item">3c. Movimiento de Chispas</div>
+    <div class="paso-item">4. Fase de Refresco</div>    
+
+  </div>
+
+  <!-- Botones para controlar con JS -->
+  <div class="controles">
+    <button id="btn-anterior">Anterior</button>
+    <button id="btn-siguiente">Siguiente</button>
+  </div>
+
+  <script>
+	  // Esperar a que el documento esté completamente cargado
+document.addEventListener("DOMContentLoaded", () => {
+  // Selección de elementos del DOM
+  const pasos = document.querySelectorAll(".paso-item");
+  const btnAnterior = document.getElementById("btn-anterior");
+  const btnSiguiente = document.getElementById("btn-siguiente");
+
+  // Índice para saber en qué paso estamos (comienza en el primero, índice 0)
+  let pasoActual = 0;
+
+  // Función para actualizar la interfaz visual y los botones
+  function actualizarPasos() {
+    pasos.forEach((paso, index) => {
+      if (index === pasoActual) {
+        paso.classList.add("activo");
+        // Desplazar suavemente la pantalla si el paso no es visible
+        paso.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } else {
+        paso.classList.remove("activo");
+      }
+    });
+
+    // Deshabilitar botón "Anterior" si estamos en el primer paso
+    btnAnterior.disabled = pasoActual === 0;
+
+    // Deshabilitar botón "Siguiente" si estamos en el último paso
+    btnSiguiente.disabled = pasoActual === pasos.length - 1;
+  }
+
+  // Evento para avanzar de paso
+  btnSiguiente.addEventListener("click", () => {
+    if (pasoActual < pasos.length - 1) {
+      pasoActual++;
+      actualizarPasos();
+    }
+  });
+
+  // Evento para retroceder de paso
+  btnAnterior.disabled = true; // Estado inicial
+
+  btnAnterior.addEventListener("click", () => {
+    if (pasoActual > 0) {
+      pasoActual--;
+      actualizarPasos();
+    }
+  });
+
+  // Inicializar estado del primer paso
+  actualizarPasos();
+
+  // --- CONFIGURACIÓN DE RECONOCIMIENTO DE VOZ ---
+  // Comprobar soporte del navegador (Safari/iPad usa webkitSpeechRecognition)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognition) {
+    const recognition = new SpeechRecognition();
+
+    // Configuración del motor de voz
+    recognition.lang = 'es-ES';        // Idioma en español
+    recognition.continuous = true;     // Mantener escuchando en segundo plano
+    recognition.interimResults = false; // Procesar solo cuando termine la palabra
+
+    // Escuchar resultados de voz
+    recognition.onresult = (event) => {
+      // Obtener la última palabra detectada en minúsculas y sin espacios
+      const ultimoIndice = event.results.length - 1;
+      const comando = event.results[ultimoIndice][0].transcript.trim().toLowerCase();
+
+      console.log("Comando detectado:", comando);
+
+      // Lógica para ejecutar la acción según la palabra clave
+      if (comando.includes("siguiente") || comando.includes("avanza")) {
+        btnSiguiente.click();
+      } else if (comando.includes("anterior") || comando.includes("atrás") || comando.includes("atras")) {
+        btnAnterior.click();
+      } else if (comando.includes("reiniciar") || comando.includes("inicio")) {
+        pasoActual = 0;
+        actualizarPasos();
+      }
+    };
+
+    // Reiniciar automáticamente la escucha si se detiene por inactividad
+    recognition.onend = () => {
+      recognition.start();
+    };
+
+    // Iniciar la escucha
+    recognition.start();
+
+  } else {
+    alert("Tu navegador no soporta el reconocimiento de voz por API Web.");
+  }
+  // FINAL RECONOCIMIENTO DE VOZ //
+
+
+});
+  </script>
+
+</body>
+</html>
